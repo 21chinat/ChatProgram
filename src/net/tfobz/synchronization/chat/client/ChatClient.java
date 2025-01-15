@@ -17,7 +17,7 @@ public class ChatClient
 	public static void main(String[] args) {
 		Socket client = null;
 		try {
-			client = new Socket(args[1], PORT);
+			client = new Socket("localHost", PORT);
 			BufferedReader in = 
 				new BufferedReader( new InputStreamReader(client.getInputStream()));
 			PrintStream out = new PrintStream(client.getOutputStream());
@@ -25,7 +25,7 @@ public class ChatClient
 				new BufferedReader(new InputStreamReader(System.in));
 			
 			// sending the name of the client to the server
-			out.println(args[0]);
+			out.println("tester");
 			
 			new ChatClientThread(in).start();
 			

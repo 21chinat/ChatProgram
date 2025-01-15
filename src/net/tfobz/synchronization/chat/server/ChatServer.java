@@ -11,7 +11,7 @@ public class ChatServer
 	public static final int PORT = 65535;
 	
 	protected static ArrayList<PrintStream> outputStreams =
-		new ArrayList();
+		new ArrayList<PrintStream>();
 	
 	public static void main(String[] args) {
 		ServerSocket server = null;
