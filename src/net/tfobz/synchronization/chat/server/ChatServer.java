@@ -12,6 +12,8 @@ public class ChatServer
 	
 	protected static ArrayList<ChatRoom> rooms =
 			new ArrayList<ChatRoom>();
+	public static ArrayList<ChatUser> users=
+			new ArrayList<ChatUser>();
 	
 	public static void main(String[] args) {
 		ServerSocket server = null;

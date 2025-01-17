@@ -8,12 +8,14 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import net.tfobz.synchronization.chat.ChatUser;
+
 public class ChatServerThread extends Thread
 {
 	private Socket client = null;
 	private BufferedReader in = null;
 	private PrintStream out = null;
-	private Color color = null;
+	private ChatUser user=null;
 	private ArrayList<PrintStream> room = null;
 	
 	public ChatServerThread(Socket client) throws IOException {
@@ -25,20 +27,12 @@ public class ChatServerThread extends Thread
 	@Override
 	public void run() {
 		try {
-			ChatServer.outputStreams.add(out);
 			
 			String name = in.readLine();
-			if(name == null || name.length()<3) {
-				ChatServer.outputStreams.remove(out);
-				return;
-			}
-			for (String user : ChatServer.names) {
-				if(user.equals(name)) {
-					ChatServer.outputStreams.remove(out);
-					return;
+			user = new ChatUser(name);
+			
+			ChatServer.outputStreams.add(out);
 
-				}
-			}
 			
 			System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
 			for (PrintStream outs: ChatServer.outputStreams)
@@ -74,6 +68,8 @@ public class ChatServerThread extends Thread
 			e.printStackTrace();
 			if (out != null)
 				ChatServer.outputStreams.remove(out);
+		}catch (IllegalArgumentException e) {
+			out.println(e.getMessage());
 		} finally {
 			try { client.close(); } catch (Exception e1) { ; }
 		}
