@@ -12,6 +12,10 @@ public class ChatServer
 	
 	protected static ArrayList<PrintStream> outputStreams =
 		new ArrayList<PrintStream>();
+	protected static ArrayList<String> names =
+		new ArrayList<String>();
+	protected static ArrayList<ArrayList<PrintStream>> rooms =
+			new ArrayList<ArrayList<PrintStream>>();
 	
 	public static void main(String[] args) {
 		ServerSocket server = null;
