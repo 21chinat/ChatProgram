@@ -25,7 +25,7 @@ public class ChatClient
 				new BufferedReader(new InputStreamReader(System.in));
 			
 			// sending the name of the client to the server
-			out.println("test");
+			out.println("aaaa");
 			
 			new ChatClientThread(in).start();
 			

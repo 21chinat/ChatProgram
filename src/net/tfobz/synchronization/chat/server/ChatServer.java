@@ -1,21 +1,17 @@
 package net.tfobz.synchronization.chat.server;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import net.tfobz.synchronization.chat.*;
 
 public class ChatServer
 {
 	public static final int PORT = 65535;
 	
-	protected static ArrayList<PrintStream> outputStreams =
-		new ArrayList<PrintStream>();
-	protected static ArrayList<String> names =
-		new ArrayList<String>();
-	protected static ArrayList<ArrayList<PrintStream>> rooms =
-			new ArrayList<ArrayList<PrintStream>>();
+	protected static ArrayList<ChatRoom> rooms =
+			new ArrayList<ChatRoom>();
 	
 	public static void main(String[] args) {
 		ServerSocket server = null;

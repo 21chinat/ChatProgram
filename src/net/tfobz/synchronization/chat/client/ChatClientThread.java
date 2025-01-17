@@ -17,6 +17,8 @@ public class ChatClientThread extends Thread
 		try {
 			while (true) {
 				String line = in.readLine();
+				if (line == null)
+					break;
 				System.out.println(line);
 			}
 		} catch (SocketException e) {

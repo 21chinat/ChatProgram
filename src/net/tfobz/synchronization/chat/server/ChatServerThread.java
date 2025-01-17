@@ -1,5 +1,6 @@
 package net.tfobz.synchronization.chat.server;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,6 +13,7 @@ public class ChatServerThread extends Thread
 	private Socket client = null;
 	private BufferedReader in = null;
 	private PrintStream out = null;
+	private Color color = null;
 	private ArrayList<PrintStream> room = null;
 	
 	public ChatServerThread(Socket client) throws IOException {
@@ -26,33 +28,47 @@ public class ChatServerThread extends Thread
 			ChatServer.outputStreams.add(out);
 			
 			String name = in.readLine();
-			if(name != null && name.length()>3) {
-				System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
-				for (PrintStream outs: ChatServer.outputStreams)
-					outs.println(name + " signed in");
-				
-				while (true) {
-					String line = in.readLine();
-					if (line == null)
-						break;
-					if(line.startsWith("/")) {
-						if(line.startsWith("/msg ")) {
-							for (String user : ChatServer.names) {
-								if(line.contains(user))
-									ChatServer.outputStreams.get()
-							}
-						}
-					}else { 
-						for (PrintStream outs: ChatServer.outputStreams)
-							outs.println(name + ": " + line);
-					}
-				}
-				
-				ChatServer.outputStreams.remove(out);
-				System.out.println(name + " signed out. " + ChatServer.outputStreams.size() + " users");
-				for (PrintStream outs: ChatServer.outputStreams)
-					outs.println(name + " signed out");
+			if(name == null || name.length()<3) {
+				client.close();
+				return;
 			}
+			for (String user : ChatServer.names) {
+				if(user.equals(name)) {
+					client.close();
+					return;
+
+				}
+			}
+			
+			System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
+			for (PrintStream outs: ChatServer.outputStreams)
+				outs.println(name + " signed in");
+			
+			while (true) {
+				String line = in.readLine();
+				if (line == null)
+					break;
+				if(line.startsWith("/")) {
+					if(line.startsWith("/msg ")) {
+						for (int i = 0; i < ChatServer.names.size(); i++) {
+							String user = ChatServer.names.get(i);
+							if(line.contains(user))
+								ChatServer.outputStreams.get(i).println("(Private)"+name + ": " + line);
+						}
+					}else if(line.startsWith("/stop ")) {
+						
+					}
+				}else { 
+					for (PrintStream outs: ChatServer.outputStreams)
+						outs.println(name + ": " + line);
+				}
+			}
+			
+			ChatServer.outputStreams.remove(out);
+			System.out.println(name + " signed out. " + ChatServer.outputStreams.size() + " users");
+			for (PrintStream outs: ChatServer.outputStreams)
+				outs.println(name + " signed out");
+			
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 			e.printStackTrace();
