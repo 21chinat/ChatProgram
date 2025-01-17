@@ -29,12 +29,12 @@ public class ChatServerThread extends Thread
 			
 			String name = in.readLine();
 			if(name == null || name.length()<3) {
-				client.close();
+				ChatServer.outputStreams.remove(out);
 				return;
 			}
 			for (String user : ChatServer.names) {
 				if(user.equals(name)) {
-					client.close();
+					ChatServer.outputStreams.remove(out);
 					return;
 
 				}
