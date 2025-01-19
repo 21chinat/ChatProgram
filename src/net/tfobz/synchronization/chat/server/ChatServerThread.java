@@ -1,42 +1,45 @@
 package net.tfobz.synchronization.chat.server;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Random;
 
+import net.tfobz.synchronization.chat.ChatRoom;
 import net.tfobz.synchronization.chat.ChatUser;
 
 public class ChatServerThread extends Thread
 {
+
 	private Socket client = null;
 	private BufferedReader in = null;
-	private PrintStream out = null;
 	private ChatUser user=null;
-	private ArrayList<PrintStream> room = null;
+	private ChatRoom room = null;
+	private String name;
 	
 	public ChatServerThread(Socket client) throws IOException {
+		this.setDaemon(true);
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		out = new PrintStream(client.getOutputStream());
 	}
 	
 	@Override
 	public void run() {
 		try {
+			name = in.readLine();
+			user = new ChatUser(new PrintStream(client.getOutputStream()), name);
 			
-			String name = in.readLine();
-			user = new ChatUser(name);
+			ChatServer.users.add(user);
+			name = "<span style=\"color:#"+String.format("#%06X", new Random().nextInt(0xFFFFFF + 1))+"\">"+name+"</span>";
+			room = ChatServer.rooms.get(0);
+			room.add(user);
 			
-			ChatServer.outputStreams.add(out);
-
+			System.out.println(user.getUsername() + " signed in. " + ChatServer.users.size() + " users");
 			
-			System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
-			for (PrintStream outs: ChatServer.outputStreams)
-				outs.println(name + " signed in");
+			for (ChatUser user: room.getUsers())
+				user.getOut().println(name + " signed in");
 			
 			while (true) {
 				String line = in.readLine();
@@ -44,32 +47,42 @@ public class ChatServerThread extends Thread
 					break;
 				if(line.startsWith("/")) {
 					if(line.startsWith("/msg ")) {
-						for (int i = 0; i < ChatServer.names.size(); i++) {
-							String user = ChatServer.names.get(i);
-							if(line.contains(user))
-								ChatServer.outputStreams.get(i).println("(Private)"+name + ": " + line);
+						for (ChatUser user : ChatServer.users) {
+							if(line.replaceFirst("/msg ", "").trim().startsWith(user.getUsername())){
+								user.getOut().println("(Private)"+name + line.replaceFirst("/msg ", "").trim().replace(name, ""));
+							}
 						}
-					}else if(line.startsWith("/stop ")) {
-						
+					}else if(line.startsWith("/exit")) {
+						client.close();
 					}
 				}else { 
-					for (PrintStream outs: ChatServer.outputStreams)
-						outs.println(name + ": " + line);
+					for (ChatUser user: room.getUsers()) {
+						user.getOut().println(name + ": " + line);
+					}
 				}
 			}
 			
-			ChatServer.outputStreams.remove(out);
-			System.out.println(name + " signed out. " + ChatServer.outputStreams.size() + " users");
-			for (PrintStream outs: ChatServer.outputStreams)
-				outs.println(name + " signed out");
+			ChatServer.users.remove(user);
+			room.remove(user);
+			System.out.println(name + " signed out. " + ChatServer.users.size() + " users");
+			for (ChatUser user: room.getUsers()) {
+				user.getOut().println(name + " signed out");
+			}
 			
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());
-			e.printStackTrace();
-			if (out != null)
-				ChatServer.outputStreams.remove(out);
+			if (user != null) {
+				ChatServer.users.remove(user);
+				room.remove(user);
+				System.out.println(name + " signed out. " + ChatServer.users.size() + " users");
+			}
+			
 		}catch (IllegalArgumentException e) {
-			out.println(e.getMessage());
+			try {
+				new PrintStream(client.getOutputStream()).println(e.getMessage());
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		} finally {
 			try { client.close(); } catch (Exception e1) { ; }
 		}

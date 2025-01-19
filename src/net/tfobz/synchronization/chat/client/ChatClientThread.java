@@ -10,6 +10,7 @@ public class ChatClientThread extends Thread
 	
 	public ChatClientThread(BufferedReader in) {
 		this.in = in;
+		this.setDaemon(true);
 	}
 	
 	@Override

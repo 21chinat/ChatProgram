@@ -20,6 +20,8 @@ public class ChatServer
 		try {
 			server = new ServerSocket(PORT);
 			System.out.println("Chat server started");
+			rooms.add(new ChatRoom("default"));
+			
 			while (true) {
 				Socket client = server.accept();
 				try {
