@@ -2,6 +2,8 @@ package net.tfobz.synchronization.chat;
 
 import java.util.ArrayList;
 
+import net.tfobz.synchronization.chat.server.ChatServer;
+
 public class ChatRoom {
 	
 	public String roomName = null;
@@ -18,6 +20,12 @@ public class ChatRoom {
 	public ChatRoom(String name) {
 		if(name == null)
 			throw new NullPointerException("Name can't be null");
+		for (ChatRoom room : ChatServer.rooms) {
+			if(room.getRoomName().equals(name)) {
+				throw new IllegalArgumentException("Name already in use");
+
+			}
+		}
 		roomName = name;
 		users = new ArrayList<ChatUser>();
 	}

@@ -25,11 +25,12 @@ public class ChatClient
 				new BufferedReader(new InputStreamReader(System.in));
 			
 			// sending the name of the client to the server
-			out.println("aaaaa");
+			out.println("nonaa");
 			
-			new ChatClientThread(in).start();
+			Thread t = new ChatClientThread(in);
+			t.start();
 			
-			while (true) {
+			while (t.isAlive()) {
 				String line = consoleIn.readLine();
 				if (line == null)
 					// pressed [Ctrl]+Z to sign out

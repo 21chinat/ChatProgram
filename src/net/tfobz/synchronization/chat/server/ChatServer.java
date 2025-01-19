@@ -10,7 +10,7 @@ public class ChatServer
 {
 	public static final int PORT = 65535;
 	
-	protected static ArrayList<ChatRoom> rooms =
+	public static ArrayList<ChatRoom> rooms =
 			new ArrayList<ChatRoom>();
 	public static ArrayList<ChatUser> users=
 			new ArrayList<ChatUser>();
