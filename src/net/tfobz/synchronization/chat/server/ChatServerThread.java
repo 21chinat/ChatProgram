@@ -108,7 +108,7 @@ public class ChatServerThread extends Thread {
 				user.getOut().println("Invalid Color");
 			}
 		} else if (line.startsWith("/newRoom ")) {
-			String roomName = line.replace("/color", "").trim();
+			String roomName = line.replace("/newRoom ", "").trim();
 			try {
 				ChatServer.rooms.add(new ChatRoom(roomName));
 				user.getOut().println("Room "+roomName+" created");
