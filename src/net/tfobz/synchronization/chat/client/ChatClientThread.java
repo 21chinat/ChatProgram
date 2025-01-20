@@ -3,7 +3,6 @@ package net.tfobz.synchronization.chat.client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
-
 import javax.swing.JTextArea;
 
 public class ChatClientThread extends Thread
@@ -27,9 +26,9 @@ public class ChatClientThread extends Thread
 				this.textArea.append(line);
 			}
 		} catch (SocketException e) {
-			System.out.println("Connection to ChatServer lost, ignore exception");
+			this.textArea.append("Connection to ChatServer lost, ignore exception");
 		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
+			this.textArea.append(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}
 }
