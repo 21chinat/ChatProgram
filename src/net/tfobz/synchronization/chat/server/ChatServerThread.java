@@ -70,6 +70,8 @@ public class ChatServerThread extends Thread {
 			if (user != null) {
 				ChatServer.users.remove(user);
 				room.remove(user);
+				for (ChatUser user : room.getUsers())
+					user.getOut().println(name + " signed out");
 				System.out.println(name + " signed out. " + ChatServer.users.size() + " users");
 			}
 		} catch (IllegalArgumentException e) {
@@ -89,22 +91,26 @@ public class ChatServerThread extends Thread {
 
 	private void executeCommand(String line) {
 		if (line.startsWith("/msg ")) {
-			for (ChatUser users : ChatServer.users) {
-				if (line.replaceFirst("/msg ", "").trim().startsWith(users.getUsername())) {
-					users.getOut().println("(Private)" + name
-							+ line.replaceFirst("/msg ", "").trim().replace(user.getUsername(), name+": ") + ": ");
-				}
-				user.getOut().println("(Private)" + name
-						+ line.replaceFirst("/msg ", "").trim().replace(user.getUsername(), name+": "));
+			boolean pending=true;
+			int i = 0;
+			while(pending&&i<ChatServer.users.size()) {
+				//TODO
+				i++;
 			}
+			/*for (ChatUser users : ChatServer.users) {
+				if (line.replaceFirst("/msg ", "").trim().startsWith(users.getUsername())) {
+					users.getOut().print("(Private)" + name + line.replaceFirst("/msg ", "").trim().replace(user.getUsername(), name+": ") + ": ");
+				}
+			}
+			user.getOut().print("(Private)" + name + line.replaceFirst("/msg ", "").trim().replace(user.getUsername(), name+": "));*/
 		} else if (line.startsWith("/color ")) {
 			String newColor = line.replace("/color", "").trim().substring(0, 6);
 			System.out.println(newColor);
 			try {
-				name = "<span style=\"color:" + String.format("#%06X", Integer.parseUnsignedInt(newColor, 16)) + "\">"
-						+ user.getUsername() + "</span>";
+				name = "<span style=\"color:" + String.format("#%06X", Integer.parseUnsignedInt(newColor, 16)) + "\">" + user.getUsername() + "</span>";
+				user.getOut().print("Color Changed to "+newColor);
 			} catch (NumberFormatException e) {
-				user.getOut().println("Invalid Color");
+				user.getOut().print("Invalid Color");
 			}
 		} else if (line.startsWith("/room ")) {
 			executeRoomCommand(line.replaceFirst("/room ", "").trim());
@@ -116,11 +122,11 @@ public class ChatServerThread extends Thread {
 			String roomName = line.replace("create ", "").trim();
 			try {
 				ChatServer.rooms.add(new ChatRoom(roomName));
-				user.getOut().println("Room "+roomName+" created");
+				user.getOut().print("Room "+roomName+" created");
 			} catch (NumberFormatException e) {
-				user.getOut().println("Invalid Room Name: "+roomName);
+				user.getOut().print("Invalid Room Name: "+roomName);
 			} catch (IllegalArgumentException e) {
-				user.getOut().println(e.getMessage());
+				user.getOut().print(e.getMessage());
 			}
 		}else if(line.startsWith("join ")) {
 			String roomName = line.replace("join ", "").trim();
@@ -135,7 +141,15 @@ public class ChatServerThread extends Thread {
 					i++;
 				}
 				if(room==null)
-					user.getOut().println("No Room with the name: "+roomName);
+					user.getOut().print("No Room with the name: "+roomName);
+			}
+		}else if(line.startsWith("invite ")) {
+			int i=0;
+			for (ChatUser users : ChatServer.users) {
+				if(line.contains(users.getUsername())) {
+					users.getOut().print("");
+					i++;
+				}
 			}
 		}
 		

@@ -1,5 +1,6 @@
 package net.tfobz.synchronization.chat.client;
 
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
@@ -18,6 +19,7 @@ public class ChatClientThread extends Thread
 		this.in = in;
 		this.editorPane = editorPane;
 		this.setDaemon(true);
+		content = new StringBuilder();
 	}
 	
 	@Override
@@ -34,11 +36,11 @@ public class ChatClientThread extends Thread
 		} catch (IOException e) {
 			this.addMessage(e.getClass().getName() + ": " + e.getMessage());
 		}
-		content = new StringBuilder();
+		
 	}
 	
 	public void addMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
+        EventQueue.invokeLater(() -> {
             content.append(message).append("<br>");
             editorPane.setText(content.toString());
         });

@@ -111,24 +111,13 @@ public class ChatClient extends JFrame {
         }
 
         try {
-            client = new Socket("localhost", PORT); // Ersetzen Sie "localhost" durch die Server-Adresse.
+            client = new Socket("localhost", PORT);
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintStream(client.getOutputStream());
 
-            // Senden des Benutzernamens an den Server
             out.println(username);
 
-            // Starten des Threads, um Nachrichten vom Server zu lesen
-            new Thread(() -> {
-                try {
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        appendMessage(line);
-                    }
-                } catch (IOException ex) {
-                    appendMessage("Verbindung zum Server verloren.");
-                }
-            }).start();
+            new ChatClientThread(in, textChat).start();
 
             buttonUser.setEnabled(false);
             textUser.setEnabled(false);
