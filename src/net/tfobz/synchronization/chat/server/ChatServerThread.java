@@ -47,12 +47,10 @@ public class ChatServerThread extends Thread {
 				if (line == null)
 					break;
 				if (line.startsWith("/")) {
-
-					executeCommand(line);
-
 					if (line.startsWith("/exit")) {
 						break;
 					}
+					executeCommand(line);
 				} else {
 					for (ChatUser user : room.getUsers()) {
 						user.getOut().println(name + ": " + line);
@@ -134,7 +132,10 @@ public class ChatServerThread extends Thread {
 				while (room==null&&i<ChatServer.rooms.size()) {
 					if(ChatServer.rooms.get(i).roomNameEquals(roomName))
 						room=ChatServer.rooms.get(i);
+					i++;
 				}
+				if(room==null)
+					user.getOut().println("No Room with the name: "+roomName);
 			}
 		}
 		

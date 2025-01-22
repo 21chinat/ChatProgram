@@ -1,2 +1,4 @@
 
 *.class
+bin/net/tfobz/synchronization/chat/ChatRoom.class
+bin/net/tfobz/synchronization/chat/server/ChatServerThread.class
