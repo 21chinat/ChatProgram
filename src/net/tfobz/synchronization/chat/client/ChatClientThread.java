@@ -3,16 +3,20 @@ package net.tfobz.synchronization.chat.client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
+
+import javax.swing.JEditorPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 public class ChatClientThread extends Thread
 {
 	private BufferedReader in = null;
-	private JTextArea textArea;
+	private JEditorPane editorPane;
+	private StringBuilder content;
 	
-	public ChatClientThread(BufferedReader in, JTextArea textArea) {
+	public ChatClientThread(BufferedReader in, JEditorPane editorPane) {
 		this.in = in;
-		this.textArea = textArea;
+		this.editorPane = editorPane;
 		this.setDaemon(true);
 	}
 	
@@ -23,12 +27,20 @@ public class ChatClientThread extends Thread
 				String line = in.readLine();
 				if (line == null)
 					break;
-				this.textArea.append(line);
+				this.addMessage(line);
 			}
 		} catch (SocketException e) {
-			this.textArea.append("Connection to ChatServer lost, ignore exception");
+			this.addMessage("Connection to ChatServer lost, ignore exception");
 		} catch (IOException e) {
-			this.textArea.append(e.getClass().getName() + ": " + e.getMessage());
+			this.addMessage(e.getClass().getName() + ": " + e.getMessage());
 		}
+		content = new StringBuilder();
 	}
+	
+	public void addMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            content.append(message).append("<br>");
+            editorPane.setText(content.toString());
+        });
+    }
 }

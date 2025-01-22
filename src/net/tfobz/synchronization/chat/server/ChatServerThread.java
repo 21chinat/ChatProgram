@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.Random;
 
 import net.tfobz.synchronization.chat.ChatRoom;
@@ -107,16 +108,35 @@ public class ChatServerThread extends Thread {
 			} catch (NumberFormatException e) {
 				user.getOut().println("Invalid Color");
 			}
-		} else if (line.startsWith("/newRoom ")) {
-			String roomName = line.replace("/newRoom ", "").trim();
+		} else if (line.startsWith("/room ")) {
+			executeRoomCommand(line.replaceFirst("/room ", "").trim());
+		}
+	}
+	
+	private void executeRoomCommand(String line) {
+		if(line.startsWith("create ")) {
+			String roomName = line.replace("create ", "").trim();
 			try {
 				ChatServer.rooms.add(new ChatRoom(roomName));
 				user.getOut().println("Room "+roomName+" created");
 			} catch (NumberFormatException e) {
-				user.getOut().println("Invalid Room Name");
+				user.getOut().println("Invalid Room Name: "+roomName);
 			} catch (IllegalArgumentException e) {
 				user.getOut().println(e.getMessage());
 			}
+		}else if(line.startsWith("join ")) {
+			String roomName = line.replace("join ", "").trim();
+			if(roomName.isEmpty()) {
+				this.room=ChatServer.rooms.get(0);
+			}else {
+				this.room=null;
+				int i =0;
+				while (room==null&&i<ChatServer.rooms.size()) {
+					if(ChatServer.rooms.get(i).roomNameEquals(roomName))
+						room=ChatServer.rooms.get(i);
+				}
+			}
 		}
+		
 	}
 }

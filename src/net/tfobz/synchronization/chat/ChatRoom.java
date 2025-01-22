@@ -38,6 +38,10 @@ public class ChatRoom {
 		return users.add(user);
 	}
 	
+	public boolean roomNameEquals(String name) {
+		return roomName.equals(name);
+	}
+	
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		ChatRoom ret = new ChatRoom(roomName);
