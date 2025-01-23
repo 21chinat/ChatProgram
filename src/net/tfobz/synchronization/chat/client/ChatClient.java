@@ -136,12 +136,6 @@ public class ChatClient extends JFrame {
         textMessage.setText("");
     }
 
-    private void appendMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
-            textChat.setText(textChat.getText() + message + "\n");
-        });
-    }
-
     public static void main(String[] args) {
         ChatClient cc = new ChatClient();
         cc.setVisible(true);
