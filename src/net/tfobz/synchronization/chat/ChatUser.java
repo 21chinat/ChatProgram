@@ -15,7 +15,7 @@ public class ChatUser {
 		if(name == null || name.length()<3)
 			throw new IllegalArgumentException("Name too short or null");
 		for (ChatUser user : ChatServer.users) {
-			if(user.usernameEquals(name)) {
+			if(user.getUsername().contains(name)||name.contains(user.getUsername())) {
 				throw new IllegalArgumentException("Name already in use");
 
 			}
@@ -31,7 +31,12 @@ public class ChatUser {
 	public String getUsername() {
 		return username;
 	}
+	
+	synchronized public void println(String message) {
+		out.println(message);
+	}
 
+	@Deprecated
 	public PrintStream getOut() {
 		return out;
 	}
