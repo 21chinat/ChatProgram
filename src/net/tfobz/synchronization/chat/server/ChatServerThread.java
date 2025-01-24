@@ -85,8 +85,6 @@ public class ChatServerThread extends Thread {
 				client.close();
 			} catch (Exception e1) {;}
 		}
-		System.gc();
-		System.out.println("bye");
 	}
 
 	private void executeCommand(String line) {
