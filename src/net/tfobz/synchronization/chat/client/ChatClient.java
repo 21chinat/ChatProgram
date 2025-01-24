@@ -55,11 +55,21 @@ public class ChatClient extends JFrame {
 
         buttonUser = new JButton("Anmelden");
         buttonUser.setFont(font);
+        buttonUser.setMnemonic(KeyEvent.VK_A);
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
-        buttonUser.addActionListener(e -> connectToServer());
+        buttonUser.addActionListener(e -> {
+        	if(buttonUser.getText().equals("Anmelden")) {
+        		connectToServer();
+        	}
+        	else {
+        		out.print("/exit\n");
+            buttonUser.setText("Anmelden");
+            textUser.setEditable(false);
+        	}
+        });
         panelUser.add(buttonUser, gbc);
 
         add(panelUser, BorderLayout.PAGE_START);
@@ -83,8 +93,7 @@ public class ChatClient extends JFrame {
         gbc.weightx = 1.0;
         panelMessage.add(textMessage, gbc);
 
-        buttonMessage = new JButton("Senden");
-        buttonMessage.setFont(font);
+        buttonMessage = new JButton(new ImageIcon("C:\\Users\\Luggi\\Documents\\GitHub\\ChatProgram\\src\\net\\tfobz\\synchronization\\assets\\send.png"));
         gbc.gridx = 1;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.NONE;
@@ -119,8 +128,8 @@ public class ChatClient extends JFrame {
 
             new ChatClientThread(in, textChat).start();
 
-            buttonUser.setEnabled(false);
-            textUser.setEnabled(false);
+            buttonUser.setText("Abmelden");
+            textUser.setEditable(false);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Verbindung zum Server fehlgeschlagen: " + ex.getMessage(), "Fehler", JOptionPane.ERROR_MESSAGE);
         }
