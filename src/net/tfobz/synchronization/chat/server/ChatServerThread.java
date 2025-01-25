@@ -33,7 +33,7 @@ public class ChatServerThread extends Thread {
 					+ "</span>";
 			
 			room = ChatServer.rooms.get(0);
-			room.add(user);
+			room.add(user,null);
 			
 			ChatServer.users.add(user);
 			System.out.println(user.getUsername() + " signed in. " + ChatServer.users.size() + " users");
@@ -51,9 +51,7 @@ public class ChatServerThread extends Thread {
 					}
 					executeCommand(line);
 				} else {
-					for (ChatUser user : room.getUsers()) {
-						user.println(name + ": " + line);
-					}
+					room.announce(name + ": " + line);
 				}
 			}
 
@@ -64,8 +62,8 @@ public class ChatServerThread extends Thread {
 			ChatServer.users.remove(user);
 			System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
 
-		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
+		} catch (IOException ioe) {
+			System.out.println(ioe.getClass().getName() + ": " + ioe.getMessage());
 			if (user != null) {
 				room.remove(user);
 				for (ChatUser user : ChatServer.users) {
@@ -74,16 +72,14 @@ public class ChatServerThread extends Thread {
 				ChatServer.users.remove(user);
 				System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
 			}
-		} catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException iae) {
 			try {
-				new PrintStream(client.getOutputStream()).println(e.getMessage());
-			} catch (IOException e1) {
-				e1.printStackTrace();
+				new PrintStream(client.getOutputStream()).println(iae.getMessage());
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
 			}
 		} finally {
-			try {
-				client.close();
-			} catch (Exception e1) {;}
+			try {client.close();} catch (IOException ioe) {;}
 		}
 	}
 
@@ -91,16 +87,20 @@ public class ChatServerThread extends Thread {
 		if (line.startsWith("/msg ")) {
 			message(line.replaceFirst("/msg ", "").trim());
 		} else if (line.startsWith("/color ")) {
-			String newColor = line.replace("/color", "").trim().substring(0, 6);
-			System.out.println(newColor);
-			try {
-				name = "<span style=\"color:" + String.format("#%06X", Integer.parseUnsignedInt(newColor, 16)) + "\">" + user.getUsername() + "</span>";
-				user.println("Color Changed to "+newColor);
-			} catch (NumberFormatException e) {
-				user.println("Invalid Color");
-			}
+			changeColor(line.replace("/color", "").trim().substring(0, 6));
 		} else if (line.startsWith("/room ")) {
 			executeRoomCommand(line.replaceFirst("/room ", "").trim());
+		}else {
+			user.println("Unknown Command");
+		}
+	}
+	
+	private void changeColor(String color) {
+		try {
+			name = "<span style=\"color:" + String.format("#%06X", Integer.parseUnsignedInt(color, 16)) + "\">" + user.getUsername() + "</span>";
+			user.println("Color Changed to "+color);
+		} catch (NumberFormatException e) {
+			user.println("Invalid Color");
 		}
 	}
 	
@@ -109,8 +109,8 @@ public class ChatServerThread extends Thread {
 		int i = 0;
 		while(pending&&i<ChatServer.users.size()) {
 			if (line.startsWith(ChatServer.users.get(i).getUsername())) {
-				ChatServer.users.get(i).println("(Private)" + name + line.replace(user.getUsername(), name+": "));
-				user.println("(Private)" + name + line.replace(user.getUsername(), name+": "));
+				ChatServer.users.get(i).println("(Private)" + name + line.replace(user.getUsername(), ": "));
+				user.println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
 				pending=false;
 			}
 			i++;
@@ -127,10 +127,10 @@ public class ChatServerThread extends Thread {
 			roomJoin(roomCommand.replaceFirst("join", "").trim());
 		}else if(roomCommand.startsWith("invite ")) {
 			roomInvite(roomCommand.replaceFirst("invite ", "").trim());
-		}else if(roomCommand.startsWith("invite ")) {
-			roomInvite(roomCommand.replaceFirst("invite ", "").trim());
+		}else if(roomCommand.startsWith("info ")) {
+			roomInfo();
 		}else {
-			user.println("Command");
+			user.println("Room Command Unknown");
 		}
 	}
 	
@@ -146,22 +146,15 @@ public class ChatServerThread extends Thread {
 		}
 	}
 	
-	private void roomJoin(String roomName) {
+	private void roomJoin(String line) {
+		ChatRoom old = this.room;
+		this.room=null;
+		int space = line.indexOf(" ");
+		String roomName = line.substring(0, space!=-1?space:line.length());
+		String passwd = space!=-1?line.substring(space).trim():null;
 		if(roomName.isEmpty()) {
-			if(this.room!=ChatServer.rooms.get(0)){
-				this.room.remove(user);
-				for (ChatUser users : room.getUsers()) {
-					users.println(name+" left the room");
-				}
-				this.room = ChatServer.rooms.get(0);
-				this.room.add(user);
-				for (ChatUser users : room.getUsers()) {
-					users.println(name+" joined the room");
-				}
-			}
+			this.room = ChatServer.rooms.get(0);
 		}else {
-			ChatRoom old = this.room;
-			this.room=null;
 			int i =0;
 			while (room==null&&i<ChatServer.rooms.size()) {
 				if(ChatServer.rooms.get(i).roomNameEquals(roomName))
@@ -171,16 +164,20 @@ public class ChatServerThread extends Thread {
 			if(room==null) {
 				user.println("No Room with the name: "+roomName);
 				this.room=old;
-			}else {
-				old.remove(user);
-				for (ChatUser users : old.getUsers()) {
-					users.println(name+" left the room");
-				}
-				this.room.add(user);
-				for (ChatUser users : room.getUsers()) {
-					users.println(name+" joined the room "+room.getRoomName());
-				}
 			}
+		}
+		
+		if(room!=old) {
+			try {
+				this.room.add(user,passwd);
+				old.announce(name+" left the room ");
+				room.announce(name+" joined the room "+room.getRoomName());
+				old.remove(user);
+			} catch (SecurityException e) {
+				e.printStackTrace();
+				this.room=old;
+			}
+			
 		}
 	}
 	
@@ -196,6 +193,6 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void roomInfo() {
-		user.println("");
+		user.println(room.toString());
 	}
 }

@@ -1,27 +1,18 @@
 package net.tfobz.synchronization.chat;
 
 import java.util.ArrayList;
-
 import net.tfobz.synchronization.chat.server.ChatServer;
 
 public class ChatRoom {
 	
-	public String roomName = null;
-	public ArrayList<ChatUser> users = null;
+	protected String roomName = null;
+	protected ArrayList<ChatUser> users = null;
 	
-	public String getRoomName() {
-		return roomName;
-	}
-
-	public ArrayList<ChatUser> getUsers() {
-		return users;
-	}
-
 	public ChatRoom(String name) {
 		if(name == null)
 			throw new NullPointerException("Name can't be null");
 		for (ChatRoom room : ChatServer.rooms) {
-			if(room.getRoomName().equals(name)) {
+			if(room.roomName.equals(name)) {
 				throw new IllegalArgumentException("Name already in use");
 
 			}
@@ -30,24 +21,34 @@ public class ChatRoom {
 		users = new ArrayList<ChatUser>();
 	}
 	
+	public String getRoomName() {
+		return roomName;
+	}
+
+	
 	public boolean remove(ChatUser user) {
 		return users.remove(user);
 	}
 	
-	public boolean add(ChatUser user) {
-		return users.add(user);
+	public boolean add(ChatUser user, String arg) throws SecurityException {
+		if(users.contains(user))
+			return false;
+		else
+			return users.add(user);
 	}
 	
 	public boolean roomNameEquals(String name) {
 		return roomName.equals(name);
 	}
 	
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		ChatRoom ret = new ChatRoom(roomName);
-		for (ChatUser chatUser : ret.users) {
-			ret.add(chatUser);
+	public void announce(String message) {
+		for (ChatUser user : users) {
+			user.println(message);
 		}
-		return ret;
+	}
+	
+	@Override
+	public String toString() {
+		return "Room name: " + roomName + ", Pariticipants: "+users.size();
 	}
 }

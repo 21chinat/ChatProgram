@@ -4,10 +4,7 @@ import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
-
 import javax.swing.JEditorPane;
-import javax.swing.JTextArea;
-import javax.swing.SwingUtilities;
 
 public class ChatClientThread extends Thread
 {
