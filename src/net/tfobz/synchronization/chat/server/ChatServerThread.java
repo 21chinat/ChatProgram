@@ -109,7 +109,7 @@ public class ChatServerThread extends Thread {
 		int i = 0;
 		while(pending&&i<ChatServer.users.size()) {
 			if (line.startsWith(ChatServer.users.get(i).getUsername())) {
-				ChatServer.users.get(i).println("(Private)" + name + line.replace(user.getUsername(), ": "));
+				ChatServer.users.get(i).println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
 				user.println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
 				pending=false;
 			}
