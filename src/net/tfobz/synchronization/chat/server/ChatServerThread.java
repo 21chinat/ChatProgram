@@ -135,6 +135,8 @@ public class ChatServerThread extends Thread {
 			roomJoin(roomCommand.replaceFirst("join", "").trim());
 		}else if(roomCommand.startsWith("invite ")) {
 			roomInvite(roomCommand.replaceFirst("invite ", "").trim());
+		}else if(roomCommand.startsWith("leave")) {
+			roomJoin("");
 		}else if(roomCommand.startsWith("info")) {
 			roomInfo();
 		}else if(roomCommand.startsWith("help")) {
@@ -196,7 +198,7 @@ public class ChatServerThread extends Thread {
 		String invited = "";
 		for (ChatUser users : ChatServer.users) {
 			if(names.contains(users.getUsername())) {
-				users.println(name + " invited you to "+room.getRoomName());
+				users.println(name + room.generateInvite());
 				invited += users.getUsername()+", ";
 			}
 		}
@@ -211,6 +213,7 @@ public class ChatServerThread extends Thread {
 		user.println("/room create [roomName] - create and then join a chat room");
 		user.println("/room join [roomName] [password] - join a chat room. password is only needed if the chat room requires it (WIP)");
 		user.println("/room invite <users> - invite other people to your chat room.");
+		user.println("/room leave - brings you back to the default room");
 		user.println("/room info - gives you info about the chat room you are in");
 		user.println("/room help - show this help");
 	}

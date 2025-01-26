@@ -26,7 +26,11 @@ public class ChatRoom {
 
 	
 	public boolean remove(ChatUser user) {
-		return users.remove(user);
+		boolean ret;
+		synchronized (users) {
+			ret = users.remove(user);
+		}
+		return ret;
 	}
 	
 	public boolean add(ChatUser user, String arg) throws SecurityException {
@@ -48,8 +52,8 @@ public class ChatRoom {
 		}
 	}
 	
-	public void generateInvite() {
-		
+	public String generateInvite() {
+		return "invited you to " + roomName;
 	}
 	
 	@Override
