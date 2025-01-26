@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Random;
-import net.tfobz.synchronization.chat.ChatRoom;
-import net.tfobz.synchronization.chat.ChatUser;
 
 public class ChatServerThread extends Thread {
 
@@ -27,6 +25,7 @@ public class ChatServerThread extends Thread {
 	public void run() {
 		try {
 			name = in.readLine();
+			name = name.indexOf(" ")==-1?name:name.substring(0, name.indexOf(" "));
 			user = new ChatUser(new PrintStream(client.getOutputStream()), name);
 
 			name = "<span style=\"color:" + String.format("#%06X", new Random().nextInt(0xFFFFFF + 1)) + "\">" + name
@@ -90,9 +89,18 @@ public class ChatServerThread extends Thread {
 			changeColor(line.replace("/color", "").trim().substring(0, 6));
 		} else if (line.startsWith("/room ")) {
 			executeRoomCommand(line.replaceFirst("/room ", "").trim());
+		}else if (line.startsWith("/help")) {
+			help();
 		}else {
-			user.println("Unknown Command");
+			user.println("Command Unknown, use /help to get a list of commands");
 		}
+	}
+	
+	private void help() {
+		user.println("/room [command] - use a command that affects the chat rooms");
+		user.println("/color [color] - change your username color. the color is in rgb hex format, for example /color ffff00 to have a yellow username");
+		user.println("/msg [username] [message]- privatly send a message to one person (also works if not in the same room)");
+		user.println("/help - show this help");
 	}
 	
 	private void changeColor(String color) {
@@ -127,10 +135,12 @@ public class ChatServerThread extends Thread {
 			roomJoin(roomCommand.replaceFirst("join", "").trim());
 		}else if(roomCommand.startsWith("invite ")) {
 			roomInvite(roomCommand.replaceFirst("invite ", "").trim());
-		}else if(roomCommand.startsWith("info ")) {
+		}else if(roomCommand.startsWith("info")) {
 			roomInfo();
+		}else if(roomCommand.startsWith("help")) {
+			roomHelp();
 		}else {
-			user.println("Room Command Unknown");
+			user.println("Room Command Unknown, use /room help to get a list of commands");
 		}
 	}
 	
@@ -176,6 +186,7 @@ public class ChatServerThread extends Thread {
 			} catch (SecurityException e) {
 				e.printStackTrace();
 				this.room=old;
+				user.println("Access denied");
 			}
 			
 		}
@@ -194,5 +205,13 @@ public class ChatServerThread extends Thread {
 	
 	private void roomInfo() {
 		user.println(room.toString());
+	}
+	
+	private void roomHelp() {
+		user.println("/room create [roomName] - create and then join a chat room");
+		user.println("/room join [roomName] [password] - join a chat room. password is only needed if the chat room requires it (WIP)");
+		user.println("/room invite <users> - invite other people to your chat room.");
+		user.println("/room info - gives you info about the chat room you are in");
+		user.println("/room help - show this help");
 	}
 }

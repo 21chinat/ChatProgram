@@ -1,7 +1,6 @@
-package net.tfobz.synchronization.chat;
+package net.tfobz.synchronization.chat.server;
 
 import java.util.ArrayList;
-import net.tfobz.synchronization.chat.server.ChatServer;
 
 public class ChatRoom {
 	
@@ -42,9 +41,15 @@ public class ChatRoom {
 	}
 	
 	public void announce(String message) {
-		for (ChatUser user : users) {
-			user.println(message);
+		synchronized (users) {
+			for (ChatUser user : users) {
+				user.println(message);
+			}
 		}
+	}
+	
+	public void generateInvite() {
+		
 	}
 	
 	@Override

@@ -1,8 +1,6 @@
-package net.tfobz.synchronization.chat;
+package net.tfobz.synchronization.chat.server;
 
 import java.io.PrintStream;
-
-import net.tfobz.synchronization.chat.server.ChatServer;
 
 public class ChatUser {
 	
