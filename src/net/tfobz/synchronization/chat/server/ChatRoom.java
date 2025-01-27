@@ -69,7 +69,7 @@ public class ChatRoom {
 	}
 	
 	public String generateInvite(ChatUser user) {
-		return "invited you to " + roomName;
+		return " invited you to " + roomName;
 	}
 	
 	@Override

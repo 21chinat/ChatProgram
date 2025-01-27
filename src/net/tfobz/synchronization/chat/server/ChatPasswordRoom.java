@@ -20,7 +20,7 @@ public class ChatPasswordRoom extends ChatRoom {
 
 	@Override
 	public String generateInvite(ChatUser user) {
-		return "invited you to " + roomName + ", Password: "+password;
+		return " invited you to " + roomName + ", Password: "+password;
 	}
 
 	@Override
