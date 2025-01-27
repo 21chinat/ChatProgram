@@ -34,10 +34,16 @@ public class ChatRoom {
 	}
 	
 	public boolean add(ChatUser user, String arg) throws SecurityException {
-		if(users.contains(user))
-			return false;
-		else
-			return users.add(user);
+		return this.add(user);
+	}
+	
+	protected boolean add(ChatUser user) throws SecurityException {
+		synchronized (users) {
+			if(users.contains(user))
+				return false;
+			else
+				return users.add(user);
+		}
 	}
 	
 	public boolean roomNameEquals(String name) {
@@ -52,7 +58,17 @@ public class ChatRoom {
 		}
 	}
 	
-	public String generateInvite() {
+	public String userList() {
+		String ret = "";
+		synchronized (users) {
+			for (ChatUser users : users) {
+				ret+=users.getUsername()+", ";
+			}
+		}
+		return ret.substring(0, ret.length()-2);
+	}
+	
+	public String generateInvite(ChatUser user) {
 		return "invited you to " + roomName;
 	}
 	
