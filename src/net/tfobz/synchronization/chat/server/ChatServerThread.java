@@ -87,6 +87,8 @@ public class ChatServerThread extends Thread {
 			message(line.replaceFirst("/msg ", "").trim());
 		} else if (line.startsWith("/color ")) {
 			changeColor(line.replace("/color", "").trim().substring(0, 6));
+		} else if (line.startsWith("/userList")) {
+		userList();
 		} else if (line.startsWith("/room ")) {
 			executeRoomCommand(line.replaceFirst("/room ", "").trim());
 		}else if (line.startsWith("/help")) {
@@ -96,10 +98,19 @@ public class ChatServerThread extends Thread {
 		}
 	}
 	
+	private void userList() {
+		String list = "";
+		for (ChatUser users : ChatServer.users) {
+			list+=users.getUsername()+", ";
+		}
+		user.println(list.substring(0, list.length()-2));
+	}
+	
 	private void help() {
 		user.println("/room [command] - use a command that affects the chat rooms");
 		user.println("/color [color] - change your username color. the color is in rgb hex format, for example /color ffff00 to have a yellow username");
 		user.println("/msg [username] [message]- privatly send a message to one person (also works if not in the same room)");
+		user.println("/userList - get a list of all users");
 		user.println("/help - show this help");
 	}
 	
@@ -129,8 +140,10 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void executeRoomCommand(String roomCommand) {
-		if(roomCommand.startsWith("create ")) {
-			roomCreate(roomCommand.replace("create ", "").trim());
+		if(roomCommand.startsWith("createProtected ")) {
+			roomCreateProtected(roomCommand.replace("createProtected ", "").trim());
+		}else if(roomCommand.startsWith("create ")) {
+			roomCreate(roomCommand.replaceFirst("create ", "").trim());
 		}else if(roomCommand.startsWith("join")) {
 			roomJoin(roomCommand.replaceFirst("join", "").trim());
 		}else if(roomCommand.startsWith("invite ")) {
@@ -141,18 +154,33 @@ public class ChatServerThread extends Thread {
 			roomInfo();
 		}else if(roomCommand.startsWith("help")) {
 			roomHelp();
+		}else if(roomCommand.startsWith("userList")) {
+			roomUserList();
 		}else {
 			user.println("Room Command Unknown, use /room help to get a list of commands");
 		}
 	}
 	
-	private void roomCreate(String roomName) {
+	private void roomCreate(String line) {
 		try {
+			int space = line.indexOf(" ");
+			String roomName = line.substring(0, space!=-1?space:line.length());
 			ChatServer.rooms.add(new ChatRoom(roomName));
 			user.println("Room "+roomName+" created");
 			roomJoin(roomName);
-		} catch (NumberFormatException e) {
-			user.println("Invalid Room Name: "+roomName);
+		} catch (IllegalArgumentException e) {
+			user.println(e.getMessage());
+		}
+	}
+	
+	private void roomCreateProtected(String line) {
+		try {
+			int space = line.indexOf(" ");
+			String roomName = line.substring(0, space!=-1?space:line.length());
+			String password = space!=-1?line.substring(space).trim():null;
+			ChatServer.rooms.add(new ChatPasswordRoom(roomName,password));
+			user.println("Room "+roomName+" created with Password "+password);
+			roomJoin(roomName);
 		} catch (IllegalArgumentException e) {
 			user.println(e.getMessage());
 		}
@@ -163,7 +191,7 @@ public class ChatServerThread extends Thread {
 		this.room=null;
 		int space = line.indexOf(" ");
 		String roomName = line.substring(0, space!=-1?space:line.length());
-		String passwd = space!=-1?line.substring(space).trim():null;
+		String password = space!=-1?line.substring(space).trim():null;
 		if(roomName.isEmpty()) {
 			this.room = ChatServer.rooms.get(0);
 		}else {
@@ -181,7 +209,7 @@ public class ChatServerThread extends Thread {
 		
 		if(room!=old) {
 			try {
-				this.room.add(user,passwd);
+				this.room.add(user,password);
 				old.announce(name+" left the room ");
 				room.announce(name+" joined the room "+room.getRoomName());
 				old.remove(user);
@@ -198,7 +226,7 @@ public class ChatServerThread extends Thread {
 		String invited = "";
 		for (ChatUser users : ChatServer.users) {
 			if(names.contains(users.getUsername())) {
-				users.println(name + room.generateInvite());
+				users.println(name + room.generateInvite(users));
 				invited += users.getUsername()+", ";
 			}
 		}
@@ -209,12 +237,18 @@ public class ChatServerThread extends Thread {
 		user.println(room.toString());
 	}
 	
+	private void roomUserList() {
+		user.println(room.userList());
+	}
+	
 	private void roomHelp() {
 		user.println("/room create [roomName] - create and then join a chat room");
-		user.println("/room join [roomName] [password] - join a chat room. password is only needed if the chat room requires it (WIP)");
+		user.println("/room createProtected [roomName] [password]- create and then join a chat room that is protected by a password");
+		user.println("/room join [roomName] [password] - join a chat room if needed using the password. the password is not always required");
 		user.println("/room invite <users> - invite other people to your chat room.");
 		user.println("/room leave - brings you back to the default room");
 		user.println("/room info - gives you info about the chat room you are in");
+		user.println("/room userList - gives you a list of users in the room");
 		user.println("/room help - show this help");
 	}
 }

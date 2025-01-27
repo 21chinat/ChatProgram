@@ -30,12 +30,9 @@ public class ChatUser {
 		return username;
 	}
 	
-	synchronized public void println(String message) {
-		out.println(message);
-	}
-
-	@Deprecated
-	public PrintStream getOut() {
-		return out;
+	public void println(String message) {
+		synchronized(out){
+			out.println(message);
+		}
 	}
 }
