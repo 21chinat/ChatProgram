@@ -92,6 +92,8 @@ public class ChatServerThread extends Thread {
 			executeRoomCommand(line.replaceFirst("/room ", "").trim());
 		}else if (line.startsWith("/help")) {
 			help();
+		}else if (line.startsWith("/clear")) {
+			user.println("/clear");
 		}else {
 			user.println("Command Unknown, use /help to get a list of commands");
 		}
@@ -110,6 +112,7 @@ public class ChatServerThread extends Thread {
 		user.println("/color [color] - change your username color. the color is in rgb hex format, for example /color ffff00 to have a yellow username");
 		user.println("/msg [username] [message]- privatly send a message to one person (also works if not in the same room)");
 		user.println("/userList - get a list of all users");
+		user.println("/clear - clears the displayed messages");
 		user.println("/help - show this help");
 	}
 	
