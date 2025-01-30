@@ -9,16 +9,16 @@ import javax.swing.JEditorPane;
 public class ChatClientThread extends Thread
 {
 	private BufferedReader in = null;
-	private JEditorPane editorPane;
-	private StringBuilder content;
-	
+	private JEditorPane editorPane = null;
+	private StringBuilder content = null;
+
 	public ChatClientThread(BufferedReader in, JEditorPane editorPane) {
 		this.in = in;
 		this.editorPane = editorPane;
 		this.setDaemon(true);
 		content = new StringBuilder();
 	}
-	
+
 	@Override
 	public void run() {
 		try {
@@ -26,6 +26,8 @@ public class ChatClientThread extends Thread
 				String line = in.readLine();
 				if (line == null)
 					break;
+				if (line.equals("/clear"))
+					content = new StringBuilder();
 				this.addMessage(line);
 			}
 		} catch (SocketException e) {
@@ -33,13 +35,13 @@ public class ChatClientThread extends Thread
 		} catch (IOException e) {
 			this.addMessage(e.getClass().getName() + ": " + e.getMessage());
 		}
-		
+
 	}
-	
+
 	public void addMessage(String message) {
-        EventQueue.invokeLater(() -> {
-            content.append(message).append("<br>");
-            editorPane.setText(content.toString());
-        });
-    }
+		EventQueue.invokeLater(() -> {
+			content.append(message).append("<br>");
+			editorPane.setText(content.toString());
+		});
+	}
 }
