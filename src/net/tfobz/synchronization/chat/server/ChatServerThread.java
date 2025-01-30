@@ -139,8 +139,10 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void executeRoomCommand(String roomCommand) {
-		if(roomCommand.startsWith("createProtected ")) {
-			roomCreateProtected(roomCommand.replace("createProtected ", "").trim());
+		if(roomCommand.startsWith("createPassword ")) {
+			roomCreatePassword(roomCommand.replace("createPassword ", "").trim());
+		}else if(roomCommand.startsWith("createInvite ")) {
+			roomCreateInvite(roomCommand.replaceFirst("createInvite ", "").trim());
 		}else if(roomCommand.startsWith("create ")) {
 			roomCreate(roomCommand.replaceFirst("create ", "").trim());
 		}else if(roomCommand.startsWith("join")) {
@@ -172,7 +174,7 @@ public class ChatServerThread extends Thread {
 		}
 	}
 	
-	private void roomCreateProtected(String line) {
+	private void roomCreatePassword(String line) {
 		try {
 			int space = line.indexOf(" ");
 			String roomName = line.substring(0, space!=-1?space:line.length());
@@ -180,6 +182,18 @@ public class ChatServerThread extends Thread {
 			ChatServer.rooms.add(new ChatPasswordRoom(roomName,password));
 			user.println("Room "+roomName+" created with Password "+password);
 			roomJoin(roomName,password);
+		} catch (IllegalArgumentException e) {
+			user.println(e.getMessage());
+		}
+	}
+	
+	private void roomCreateInvite(String line) {
+		try {
+			int space = line.indexOf(" ");
+			String roomName = line.substring(0, space!=-1?space:line.length());
+			ChatServer.rooms.add(new ChatInviteRoom(roomName, user));
+			user.println("Room "+roomName+" created");
+			roomJoin(roomName);
 		} catch (IllegalArgumentException e) {
 			user.println(e.getMessage());
 		}
@@ -245,7 +259,8 @@ public class ChatServerThread extends Thread {
 	
 	private void roomHelp() {
 		user.println("/room create [roomName] - create and then join a chat room");
-		user.println("/room createProtected [roomName] [password]- create and then join a chat room that is protected by a password");
+		user.println("/room createPassword [roomName] [password]- create and then join a chat room that is protected by a password");
+		user.println("/room createInvite [roomName] - create and then join a room you need to be invited to to join");
 		user.println("/room join [roomName] [password] - join a chat room. the password is not always required");
 		user.println("/room invite <users> - invite other people to your chat room.");
 		user.println("/room leave - brings you back to the default room");

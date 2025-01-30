@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class ChatRoom {
 	
-	protected String roomName = null;
-	protected ArrayList<ChatUser> users = null;
+	private final String roomName;
+	private ArrayList<ChatUser> users = null;
 	
 	public ChatRoom(String name) {
 		if(name == null)
@@ -24,6 +24,11 @@ public class ChatRoom {
 		return roomName;
 	}
 
+	public int userCount() {
+		synchronized (users) {
+			return users.size();
+		}
+	}
 	
 	public boolean remove(ChatUser user) {
 		boolean ret;
@@ -74,6 +79,6 @@ public class ChatRoom {
 	
 	@Override
 	public String toString() {
-		return "Room name: " + roomName + ", Pariticipants: "+users.size();
+		return "Room name: " + roomName + ", Pariticipants: "+userCount();
 	}
 }
