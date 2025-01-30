@@ -126,15 +126,21 @@ public class ChatClient extends JFrame
 				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
 					control = true;
 				}
-				if (e.getKeyCode() == KeyEvent.VK_PLUS && control) {
-					control = false;
-					textChat.setFont(new Font("Serif", Font.PLAIN, fontSize++));
+				if (control) {
+					if (e.getKeyCode() == KeyEvent.VK_PLUS) {
+						textChat.setFont(new Font("Serif", Font.PLAIN, ++fontSize));
+					}
+					if (e.getKeyCode() == KeyEvent.VK_MINUS) {
+						textChat.setFont(new Font("Serif", Font.PLAIN, --fontSize));
+					}
 				}
-				if (e.getKeyCode() == KeyEvent.VK_MINUS && control) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
 					control = false;
-					textChat.setFont(new Font("Serif", Font.PLAIN, fontSize--));
 				}
-				repaint();
 			}
 		});
 		if (SystemTray.isSupported()) {
@@ -204,8 +210,8 @@ public class ChatClient extends JFrame
 		String message = textMessage.getText().trim();
 		if (message.equals("/clear")) {
 			textChat.setText("");
-			textMessage.setText("");
-		} else if (!message.isEmpty() || out != null) {
+		}
+		if (!message.isEmpty() || out != null) {
 			out.println(message);
 			textMessage.setText("");
 		}
