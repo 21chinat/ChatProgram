@@ -26,8 +26,10 @@ public class ChatClientThread extends Thread
 				String line = in.readLine();
 				if (line == null)
 					break;
-				if (line.equals("/clear"))
+				if (line.equals("/clear")) {
 					content = new StringBuilder();
+					System.out.println("aaa");
+				}
 				this.addMessage(line);
 			}
 		} catch (SocketException e) {

@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.*;
 import javax.swing.*;
 
+@SuppressWarnings("serial")
 public class ChatClient extends JFrame
 {
 

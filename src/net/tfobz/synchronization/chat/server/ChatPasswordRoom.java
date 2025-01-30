@@ -17,15 +17,20 @@ public class ChatPasswordRoom extends ChatRoom {
 			throw new SecurityException("Access Denied: password incorrect");
 		return super.add(user);
 	}
+	
+	@Override
+	public boolean add(ChatUser user) throws SecurityException {
+		throw new SecurityException("Access Denied: Password required");
+	}
 
 	@Override
 	public String generateInvite(ChatUser user) {
-		return " invited you to " + roomName + ", Password: "+password;
+		return super.generateInvite(user) + ", Password: "+password;
 	}
 
 	@Override
 	public String toString() {
-		return "Room name: " + roomName + ", Pariticipants: "+users.size()+", Password: "+password;
+		return "Room name: " + getRoomName() + ", Pariticipants: "+userCount()+", Password: "+password;
 	}
 
 }
