@@ -33,10 +33,12 @@ public class ChatServerThread extends Thread {
 			room = ChatServer.rooms.get(0);
 			room.add(user,null);
 			
-			ChatServer.users.add(user);
-			System.out.println(user.getUsername() + " signed in. " + ChatServer.users.size() + " users");
-			for (ChatUser user : ChatServer.users)
-				user.println(name + " signed in");
+			synchronized (ChatServer.users) {
+				ChatServer.users.add(user);
+				System.out.println(user.getUsername() + " signed in. " + ChatServer.users.size() + " users");
+				for (ChatUser user : ChatServer.users)
+					user.println(name + " signed in");
+			}
 
 			while (true) {
 				String line = in.readLine();
@@ -54,21 +56,24 @@ public class ChatServerThread extends Thread {
 			}
 
 			room.remove(user);
-			for (ChatUser user : ChatServer.users) {
-				user.println(name + " signed out");
+			synchronized (ChatServer.users) {
+				for (ChatUser user : ChatServer.users)
+					user.println(name + " signed out");
+				ChatServer.users.remove(user);
+				System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
 			}
-			ChatServer.users.remove(user);
-			System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
-
+			
 		} catch (IOException ioe) {
 			System.out.println(ioe.getClass().getName() + ": " + ioe.getMessage());
 			if (user != null) {
 				room.remove(user);
-				for (ChatUser user : ChatServer.users) {
-					user.println(name + " signed out");
+				synchronized (ChatServer.users) {
+					for (ChatUser user : ChatServer.users) {
+						user.println(name + " signed out");
+					}
+					ChatServer.users.remove(user);
+					System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
 				}
-				ChatServer.users.remove(user);
-				System.out.println(user.getUsername() + " signed out. " + ChatServer.users.size() + " users");
 			}
 		} catch (IllegalArgumentException iae) {
 			try {
