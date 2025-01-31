@@ -28,7 +28,6 @@ public class ChatClientThread extends Thread
 					break;
 				if (line.equals("/clear")) {
 					content = new StringBuilder();
-					System.out.println("aaa");
 				}
 				this.addMessage(line);
 			}

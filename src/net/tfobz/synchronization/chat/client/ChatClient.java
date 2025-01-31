@@ -33,10 +33,8 @@ public class ChatClient extends JFrame
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
 		setTitle("Chat");
-		setIconImage(new ImageIcon(
-				"C:\\Users\\Luggi\\Documents\\GitHub\\ChatProgram\\src\\net\\tfobz\\synchronization\\assets\\icon.png")
-						.getImage());
-		setMinimumSize(new Dimension(800, 600));
+		setIconImage(new ImageIcon(ChatClient.class.getResource("/net/tfobz/synchronization/assets/icon.png")).getImage());
+		setMinimumSize(new Dimension(800, 500));
 		setSize(new Dimension(1024, 768));
 		setLocationRelativeTo(null);
 
@@ -72,10 +70,12 @@ public class ChatClient extends JFrame
 		buttonUser.addActionListener(e -> {
 			if (buttonUser.getText().equals("Anmelden")) {
 				connectToServer();
-			} else {
-				out.print("/exit\n");
-				buttonUser.setText("Anmelden");
+				buttonUser.setText("Abmelden");
 				textUser.setEditable(false);
+			} else {
+				out.println("/exit");
+				buttonUser.setText("Anmelden");
+				textUser.setEditable(true);
 			}
 		});
 		panelUser.add(buttonUser, gbc);
@@ -101,8 +101,7 @@ public class ChatClient extends JFrame
 		gbc.weightx = 1.0;
 		panelMessage.add(textMessage, gbc);
 
-		buttonMessage = new JButton(new ImageIcon(
-				"C:\\Users\\Luggi\\Documents\\GitHub\\ChatProgram\\src\\net\\tfobz\\synchronization\\assets\\send.png"));
+		buttonMessage = new JButton(new ImageIcon(ChatClient.class.getResource("/net/tfobz/synchronization/assets/send.png")));
 		buttonMessage.setPreferredSize(new Dimension(50, 50));
 		gbc.gridx = 1;
 		gbc.gridy = 0;
@@ -145,10 +144,7 @@ public class ChatClient extends JFrame
 			}
 		});
 		if (SystemTray.isSupported()) {
-			trayIcon = new TrayIcon(new ImageIcon(
-					"C:\\Users\\Luggi\\Documents\\GitHub\\ChatProgram\\src\\net\\tfobz\\synchronization\\assets\\icon.png")
-							.getImage(),
-					getTitle());
+			trayIcon = new TrayIcon(new ImageIcon(ChatClient.class.getResource("/net/tfobz/synchronization/assets/icon.png")).getImage(),getTitle());
 			trayIcon.setImageAutoSize(true);
 			trayIcon.addActionListener(e -> {
 				setVisible(true);
@@ -158,7 +154,7 @@ public class ChatClient extends JFrame
 
 			addWindowListener(new WindowAdapter() {
 				@Override
-				public void windowClosing(WindowEvent e) {
+				public void windowIconified(WindowEvent e) {
 					if (buttonUser.getText().equals("Abmelden")) {
 						setDefaultCloseOperation(HIDE_ON_CLOSE);
 						try {
@@ -176,7 +172,7 @@ public class ChatClient extends JFrame
 				}
 			});
 		} else {
-			JOptionPane.showMessageDialog(this, "System-Tray wird nicht unterstÃ¼tzt.", "Fehler", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "System-Tray wird nicht unterstützt.", "Fehler", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -198,7 +194,6 @@ public class ChatClient extends JFrame
 
 				new ChatClientThread(in, textChat).start();
 
-				buttonUser.setText("Abmelden");
 				textUser.setEditable(false);
 			} catch (IOException ex) {
 				JOptionPane.showMessageDialog(this, "Verbindung zum Server fehlgeschlagen: " + ex.getMessage(), "Fehler",
@@ -212,7 +207,10 @@ public class ChatClient extends JFrame
 		if (message.equals("/clear")) {
 			textChat.setText("");
 		}
-		if (!message.isEmpty() || out != null) {
+		if (message.equals("/exit")) {
+			textChat.setText("");
+			buttonUser.doClick();
+		}else if (!message.isEmpty() || out != null) {
 			out.println(message);
 			textMessage.setText("");
 		}

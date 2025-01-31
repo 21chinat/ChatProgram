@@ -106,7 +106,8 @@ public class ChatServerThread extends Thread {
 	
 	private void userList() {
 		String list = "";
-		for (ChatUser users : ChatServer.users) {
+		synchronized (ChatServer.users) {
+			for (ChatUser users : ChatServer.users)
 			list+=users.getUsername()+", ";
 		}
 		user.println(list.substring(0, list.length()-2));
@@ -119,6 +120,7 @@ public class ChatServerThread extends Thread {
 		user.println("/userList - get a list of all users");
 		user.println("/clear - clears the displayed messages");
 		user.println("/help - show this help");
+		user.println("/exit - exit the chat");
 	}
 	
 	private void changeColor(String color) {
@@ -133,13 +135,15 @@ public class ChatServerThread extends Thread {
 	private void message(String line) {
 		boolean pending=true;
 		int i = 0;
-		while(pending&&i<ChatServer.users.size()) {
-			if (line.startsWith(ChatServer.users.get(i).getUsername())) {
-				ChatServer.users.get(i).println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
-				user.println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
-				pending=false;
+		synchronized (ChatServer.users) {
+			while(pending&&i<ChatServer.users.size()) {
+				if (line.startsWith(ChatServer.users.get(i).getUsername())) {
+					ChatServer.users.get(i).println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
+					user.println("(Private)" + name + line.replace(ChatServer.users.get(i).getUsername(), ": "));
+					pending=false;
+				}
+				i++;
 			}
-			i++;
 		}
 		if(pending) {
 			user.println("No such user found");
@@ -158,7 +162,7 @@ public class ChatServerThread extends Thread {
 		}else if(roomCommand.startsWith("invite ")) {
 			roomInvite(roomCommand.replaceFirst("invite ", "").trim());
 		}else if(roomCommand.startsWith("leave")) {
-			roomJoin("");
+			roomJoin("","");
 		}else if(roomCommand.startsWith("info")) {
 			roomInfo();
 		}else if(roomCommand.startsWith("help")) {
@@ -174,7 +178,9 @@ public class ChatServerThread extends Thread {
 		try {
 			int space = line.indexOf(" ");
 			String roomName = line.substring(0, space!=-1?space:line.length());
-			ChatServer.rooms.add(new ChatRoom(roomName));
+			synchronized (ChatServer.rooms) {
+				ChatServer.rooms.add(new ChatRoom(roomName));
+			}
 			user.println("Room "+roomName+" created");
 			roomJoin(roomName);
 		} catch (IllegalArgumentException e) {
@@ -187,7 +193,9 @@ public class ChatServerThread extends Thread {
 			int space = line.indexOf(" ");
 			String roomName = line.substring(0, space!=-1?space:line.length());
 			String password = space!=-1?line.substring(space).trim():null;
-			ChatServer.rooms.add(new ChatPasswordRoom(roomName,password));
+			synchronized (ChatServer.rooms) {
+				ChatServer.rooms.add(new ChatPasswordRoom(roomName,password));
+			}
 			user.println("Room "+roomName+" created with Password "+password);
 			roomJoin(roomName,password);
 		} catch (IllegalArgumentException e) {
@@ -199,7 +207,9 @@ public class ChatServerThread extends Thread {
 		try {
 			int space = line.indexOf(" ");
 			String roomName = line.substring(0, space!=-1?space:line.length());
-			ChatServer.rooms.add(new ChatInviteRoom(roomName, user));
+			synchronized (ChatServer.rooms) {
+				ChatServer.rooms.add(new ChatInviteRoom(roomName, user));
+			}
 			user.println("Room "+roomName+" created");
 			roomJoin(roomName);
 		} catch (IllegalArgumentException e) {
@@ -222,10 +232,12 @@ public class ChatServerThread extends Thread {
 			this.room = ChatServer.rooms.get(0);
 		}else {
 			int i =0;
-			while (room==null&&i<ChatServer.rooms.size()) {
-				if(ChatServer.rooms.get(i).roomNameEquals(roomName))
-					room=ChatServer.rooms.get(i);
-				i++;
+			synchronized (ChatServer.rooms) {
+				while (room==null&&i<ChatServer.rooms.size()) {
+					if(ChatServer.rooms.get(i).roomNameEquals(roomName))
+						room=ChatServer.rooms.get(i);
+					i++;
+				}
 			}
 			if(room==null) {
 				user.println("No Room with the name: "+roomName);
