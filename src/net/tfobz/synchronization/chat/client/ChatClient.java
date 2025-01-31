@@ -7,9 +7,7 @@ import java.net.*;
 import javax.swing.*;
 
 @SuppressWarnings("serial")
-public class ChatClient extends JFrame
-{
-
+public class ChatClient extends JFrame{
 	private static final int PORT = 65535;
 	private Font font = new Font("Comic Sans", Font.PLAIN, 24);
 	private int fontSize = 18;
@@ -72,10 +70,16 @@ public class ChatClient extends JFrame
 				connectToServer();
 				buttonUser.setText("Abmelden");
 				textUser.setEditable(false);
+				textMessage.setText("");
+				textMessage.setEnabled(true);
+				buttonMessage.setEnabled(true);
 			} else {
 				out.println("/exit");
 				buttonUser.setText("Anmelden");
 				textUser.setEditable(true);
+				textMessage.setText("");
+				textMessage.setEnabled(false);
+				buttonMessage.setEnabled(false);
 			}
 		});
 		panelUser.add(buttonUser, gbc);
@@ -87,6 +91,7 @@ public class ChatClient extends JFrame
 		textMessage = new JTextField();
 		textMessage.setFont(font);
 		textMessage.setPreferredSize(new Dimension(400, 32));
+		textMessage.setEnabled(false);
 		textMessage.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
@@ -103,6 +108,7 @@ public class ChatClient extends JFrame
 
 		buttonMessage = new JButton(new ImageIcon(ChatClient.class.getResource("/net/tfobz/synchronization/assets/send.png")));
 		buttonMessage.setPreferredSize(new Dimension(50, 50));
+		buttonMessage.setEnabled(false);
 		gbc.gridx = 1;
 		gbc.gridy = 0;
 		gbc.fill = GridBagConstraints.NONE;
@@ -206,14 +212,22 @@ public class ChatClient extends JFrame
 		String message = textMessage.getText().trim();
 		if (message.equals("/clear")) {
 			textChat.setText("");
-		}
-		if (message.equals("/exit")) {
+			out.println(message);
+			textMessage.setText("");
+		}else if (message.startsWith("/exit")) {
 			textChat.setText("");
 			buttonUser.doClick();
 		}else if (!message.isEmpty() || out != null) {
 			out.println(message);
 			textMessage.setText("");
 		}
+	}
+	
+	public void connectionFailed() {
+		buttonUser.setText("Anmelden");
+		textUser.setEditable(true);
+		textMessage.setEnabled(false);
+		buttonMessage.setEnabled(false);
 	}
 
 	public static void main(String[] args) {
