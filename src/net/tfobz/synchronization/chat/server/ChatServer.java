@@ -5,8 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class ChatServer
-{
+public class ChatServer {
 	public static final int PORT = 65535;
 	
 	public static ArrayList<ChatRoom> rooms =

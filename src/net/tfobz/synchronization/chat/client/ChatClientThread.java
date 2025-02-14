@@ -36,7 +36,6 @@ public class ChatClientThread extends Thread
 		} catch (IOException e) {
 			this.addMessage(e.getClass().getName() + ": " + e.getMessage());
 		}
-
 	}
 
 	public void addMessage(String message) {
